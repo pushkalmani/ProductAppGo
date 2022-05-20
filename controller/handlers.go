@@ -99,11 +99,12 @@ func (server *Server) BuyProduct(w http.ResponseWriter, r *http.Request) {
 
 		}
 		_, err = orders.CreateOrder(server.DB, orders)
-
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode("Success ,Inventory Updated")
 		json.NewEncoder(w).Encode(update_product)
 		return
 	} else {
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode("Required Quantity is not available")
 		return
 	}
@@ -127,19 +128,18 @@ func (server *Server) RecommendProducts(w http.ResponseWriter, r *http.Request) 
 
 	}
 
-	json.NewEncoder(w).Encode("The recommended Products are")
-	//for i := 0; i < len(recommended_orders); i++ {
-	//	var product models.Product
-	//	recommended_products, err := product.GetProductById(server.DB, recommended_orders.ProductID)
-	//	if err != nil {
-	//		w.WriteHeader(http.StatusInternalServerError)
-	//		json.NewEncoder(w).Encode(errors.ErrorMsg{Message: err.Error()})
-	//		return
-	//
-	//	}
-	//
-	//
-	//}
-	json.NewEncoder(w).Encode(recommended_orders)
+	for i := 0; i < len(*recommended_orders); i++ {
+		var product models.Product
+		recommended_products, err := product.GetProductById(server.DB, (*recommended_orders)[i].ProductID)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(errors.ErrorMsg{Message: err.Error()})
+			return
+
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode("The recommended Products are")
+		json.NewEncoder(w).Encode(recommended_products)
+	}
 
 }

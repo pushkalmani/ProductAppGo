@@ -14,7 +14,7 @@ type Product struct {
 }
 
 type Orders struct {
-	UserId    int       `gorm:"primary_key"json:"user_id"`
+	UserId    int       `json:"user_id"`
 	Order_qty int       `gorm:"not null"json:"order_qty"`
 	ProductID int       `gorm:"not null"json:"product_id"`
 	Product   Product   `gorm:"foreignkey:ProductID"`
@@ -85,8 +85,8 @@ func (o *Orders) CreateOrder(db *gorm.DB, order Orders) (*Orders, error) {
 	}
 	return &order, nil
 }
-func (o *Orders) RecommendOrders(db *gorm.DB, user_id int) (*Orders, error) {
-	var order Orders
+func (o *Orders) RecommendOrders(db *gorm.DB, user_id int) (*[]Orders, error) {
+	var order []Orders
 	err := db.Where("user_id=?", user_id).Limit(5).Order("order_qty desc").Find(&order).Error
 	if err != nil {
 		return nil, err
