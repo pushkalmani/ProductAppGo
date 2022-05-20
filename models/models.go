@@ -14,10 +14,10 @@ type Product struct {
 }
 
 type Orders struct {
-	UserId    int       `gorm:"primary_key;auto_increment"`
-	Orders    int       `gorm:"not null"json:"orders"`
-	ProductID int       `json:"product_id""`
-	Product   Product   `"gorm:"foreignkey:ProductID"json:"product"`
+	UserId    int       `gorm:"primary_key"json:"user_id"`
+	Order_qty int       `gorm:"not null"json:"order_qty"`
+	ProductID int       `gorm:"not null"json:"product_id"`
+	Product   Product   `gorm:"foreignkey:ProductID"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
@@ -68,4 +68,28 @@ func (p *Product) AddProducts(db *gorm.DB, listproduct []Product) (*[]Product, e
 		return nil, err
 	}
 	return &products, nil
+}
+func (p *Product) UpdateProduct(db *gorm.DB, product *Product) (*Product, error) {
+
+	err := db.Save(&product).Error
+	if err != nil {
+		return nil, err
+	}
+	return product, nil
+}
+
+func (o *Orders) CreateOrder(db *gorm.DB, order Orders) (*Orders, error) {
+	err := db.Create(&order).Error
+	if err != nil {
+		return nil, err
+	}
+	return &order, nil
+}
+func (o *Orders) RecommendOrders(db *gorm.DB, user_id int) (*Orders, error) {
+	var order Orders
+	err := db.Where("user_id=?", user_id).Limit(5).Order("order_qty desc").Find(&order).Error
+	if err != nil {
+		return nil, err
+	}
+	return &order, nil
 }
